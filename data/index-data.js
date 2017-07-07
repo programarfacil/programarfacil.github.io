@@ -30,7 +30,7 @@ chartConsumptions = Morris.Area({
         data: arrChartConsumption,
         xkey: 'period',
         ykeys: ['consumption'],
-        labels: ['Consumption kWh'],
+        labels: ['Consumption Wh'],
         pointSize: 0,
         hideHover: 'auto',
         resize: true,
