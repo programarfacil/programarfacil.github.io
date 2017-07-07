@@ -4,6 +4,7 @@ var numberResults = 300;
 var arrChartTemps = [];
 var arrChartConsumption = [];
 var arrChartFan = [];
+var arrChartTempsInto = [];
 var chartTemps;
 var lastTempBack = -1;
 var lastTempFront = -1;
@@ -29,7 +30,7 @@ chartConsumptions = Morris.Area({
         data: arrChartConsumption,
         xkey: 'period',
         ykeys: ['consumption'],
-        labels: ['Consumption kW/h'],
+        labels: ['Consumption kWh'],
         pointSize: 0,
         hideHover: 'auto',
         resize: true,
@@ -47,6 +48,18 @@ chartFan = Morris.Area({
         resize: true,
         lineColors: ['#3C763D']
 });
+
+chartTempsInto = Morris.Area({
+        element: 'tempsint-chart',
+        data: arrChartTempsInto,
+        xkey: 'period',
+        ykeys: ['tempFri','tempFre'],
+        labels: ['Temp. Fridge', 'Temp. Freeze'],
+        pointSize: 0,
+        hideHover: 'auto',
+        resize: true,
+        lineColors: ['#8A6D3B', '#31708F']
+    });
 
 // Set the configuration for your app
 var config = {
@@ -66,6 +79,7 @@ starCountRef.on('value', function(snapshot) {
     arrChartTemps = [];
     arrChartConsumption = [];
     arrChartFan = [];
+    arrChartTempsInto = [];
     snapshot.forEach(function(childSnapshot) {
         arrChartTemps.push({
             period: childSnapshot.key,
@@ -80,6 +94,11 @@ starCountRef.on('value', function(snapshot) {
             period: childSnapshot.key,
             fan: childSnapshot.val().timeFan
         });
+        arrChartTempsInto.push({
+            period: childSnapshot.key,
+            tempFri: childSnapshot.val().tempFre,
+            tempFre: childSnapshot.val().tempFri - childSnapshot.val().tempFre
+        });
 
         lastTempFront = childSnapshot.val().tempOut;
         lastTempBack = childSnapshot.val().tempInt;
@@ -90,6 +109,8 @@ starCountRef.on('value', function(snapshot) {
     updateChartTemps();
     updateChartConsumption();
     updateLastMesurements();
+    updateChartFan();
+    updateChartTempsInt();
 });
 
 function updateChartTemps()
@@ -105,6 +126,11 @@ function updateChartConsumption()
 function updateChartFan()
 {
     chartFan.setData(arrChartFan);
+}
+
+function updateChartTempsInt()
+{
+    chartTempsInto.setData(arrChartTempsInto);
 }
 
 function updateLastMesurements()
