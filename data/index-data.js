@@ -1,69 +1,77 @@
 var tiempoRefresh = 10000;
 var numberResults = 300;
+var macUser = 'A020A61AF950';
+var numberBins = 400;
+
 
 var arrChartTemps = [];
 var arrChartConsumption = [];
 var arrChartFan = [];
-var arrChartTempsInto = [];
-var chartTemps;
+var arrChartTempsInt = [];
+
+var arrLabelsChart = [];
+
 var lastTempBack = -1;
 var lastTempFront = -1;
+var lastTempFri = -1;
+var lastTempFre = -1;
 var lastConsumption = -1;
 var lastFan = -1;
 
-chartTemps = Morris.Area({
-        element: 'temps-chart',
-        data: arrChartTemps,
-        xkey: 'period',
-        ykeys: ['tempFront','tempBack'],
-        labels: ['Temp. Front', 'Temp. Back'],
-        pointSize: 0,
-        hideHover: 'auto',
-        resize: true,
-        ymax: 45,
-        ymin: 15,
-        lineColors: ['#8A6D3B', '#31708F']
-    });
+var optionsChart = {
+    responsive:true,
+    bezierCurve: true,
+    animation: {
+        duration:0
+    },
+    elements: {
+        point: {
+            radius:1 
+        }
+    },
+    scales: {
+        yAxes: [{
+            ticks: {
+                beginAtZero:false
+            }
+        }]
+    }
+}
 
-chartConsumptions = Morris.Area({
-        element: 'consumption-chart',
-        data: arrChartConsumption,
-        xkey: 'period',
-        ykeys: ['consumption'],
-        labels: ['Consumption Wh'],
-        pointSize: 0,
-        hideHover: 'auto',
-        resize: true,
-        lineColors: ['#A94442']
+var ctxTemps = document.getElementById("temps-chart").getContext('2d');
+var chartTemps = new Chart(ctxTemps, {
+    type: 'line',
+    data: {
+    },
+    options: optionsChart
 });
 
-chartFan = Morris.Area({
-        element: 'fan-chart',
-        data: arrChartFan,
-        xkey: 'period',
-        ykeys: ['fan'],
-        labels: ['Fan'],
-        pointSize: 0,
-        hideHover: 'auto',
-        resize: true,
-        lineColors: ['#3C763D']
+var ctxConsumption = document.getElementById("consumption-chart").getContext('2d');
+var chartConsumption = new Chart(ctxConsumption, {
+    type: 'line',
+    data: {
+    },
+    options: optionsChart
 });
 
-chartTempsInto = Morris.Area({
-        element: 'tempsint-chart',
-        data: arrChartTempsInto,
-        xkey: 'period',
-        ykeys: ['tempFri','tempFre'],
-        labels: ['Temp. Fridge', 'Temp. Freeze'],
-        pointSize: 0,
-        hideHover: 'auto',
-        resize: true,
-        lineColors: ['#8A6D3B', '#31708F']
-    });
+var ctxFan = document.getElementById("fan-chart").getContext('2d');
+var chartFan = new Chart(ctxFan, {
+    type: 'line',
+    data: {
+    },
+    options: optionsChart
+});
+
+var ctxTempInt = document.getElementById("tempsint-chart").getContext('2d');
+var chartTempInt = new Chart(ctxTempInt, {
+    type: 'line',
+    data: {
+    },
+    options: optionsChart
+});
 
 // Set the configuration for your app
 var config = {
-    apiKey: 'AIzaSyCfHoColdJFpIRgyYis6Tl0UriLLtJ0swI',
     authDomain: 'fridgesaverdata.firebaseapp.com',
     databaseURL: 'https://fridgesaverdata.firebaseio.com',
     storageBucket: 'fridgesaverdata.appspot.com'
@@ -74,63 +82,107 @@ firebase.initializeApp(config);
 var database = firebase.database();
 
 
-var starCountRef = firebase.database().ref('A020A61AF950').limitToLast(720);
+var starCountRef = firebase.database().ref(macUser).limitToLast(numberBins);
 starCountRef.on('value', function(snapshot) {
+    var arrChartTempBackData = [];
+    var arrChartTempFrontData = [];
+    var arrChartConsumptionData = [];
+    var arrChartFanData = [];
+    var arrChartTempFreData = [];
+    var arrChartTempFriData = [];
+
+    arrLabelsChart = [];
     arrChartTemps = [];
     arrChartConsumption = [];
     arrChartFan = [];
-    arrChartTempsInto = [];
+    arrChartTempsInt = [];
+
     snapshot.forEach(function(childSnapshot) {
-        arrChartTemps.push({
-            period: childSnapshot.key,
-            tempFront: childSnapshot.val().tempOut,
-            tempBack: childSnapshot.val().tempInt - childSnapshot.val().tempOut
-        });
-        arrChartConsumption.push({
-            period: childSnapshot.key,
-            consumption: childSnapshot.val().consumption
-        });
-        arrChartFan.push({
-            period: childSnapshot.key,
-            fan: childSnapshot.val().timeFan
-        });
-        arrChartTempsInto.push({
-            period: childSnapshot.key,
-            tempFri: childSnapshot.val().tempFre,
-            tempFre: childSnapshot.val().tempFri - childSnapshot.val().tempFre
-        });
+        arrLabelsChart.push(childSnapshot.key.toString().substr(childSnapshot.key.toString().indexOf(' ') + 1));
+
+        arrChartTempBackData.push(childSnapshot.val().tempInt);
+        arrChartTempFrontData.push(childSnapshot.val().tempOut);
+        arrChartConsumptionData.push(childSnapshot.val().consumption);
+        arrChartFanData.push(childSnapshot.val().timeFan);
+        arrChartTempFreData.push(childSnapshot.val().tempFre);
+        arrChartTempFriData.push(childSnapshot.val().tempFri);
 
         lastTempFront = childSnapshot.val().tempOut;
         lastTempBack = childSnapshot.val().tempInt;
         lastConsumption = childSnapshot.val().consumption;
         lastFan = childSnapshot.val().timeFan;
+        lastTempFre = childSnapshot.val().tempFre;
+        lastTempFri = childSnapshot.val().tempFri;
     });
+
+    arrChartTempsInt.push({
+            label: 'Temp. Freezer ºC',
+            backgroundColor: "rgba(203, 136, 18, 0.5)",
+            data: arrChartTempFreData
+        },{
+            label: 'Temp. Fridge ºC',
+            backgroundColor: "rgba(173, 144, 92, 0.5)",
+            data: arrChartTempFriData 
+        }
+    );
+
+    arrChartFan.push({
+        label: 'Fan on minutes',
+        backgroundColor: "rgba(60, 118, 61, 0.5)",
+        data: arrChartFanData
+    });
+
+    arrChartConsumption.push({
+        label: 'Consumption Wh',
+        backgroundColor: "rgba(169, 68, 66, 0.5)",
+        data: arrChartConsumptionData
+    });
+
+    arrChartTemps.push({
+            label: 'Temp. Front ºC',
+            backgroundColor: "rgba(49, 112, 143, 0.5)",
+            data: arrChartTempFrontData
+        },{
+            label: 'Temp. Back ºC',
+            backgroundColor: "rgba(138, 109, 59, 0.5)",
+            data: arrChartTempBackData 
+        }
+    );
 
     updateChartTemps();
     updateChartConsumption();
-    updateLastMesurements();
     updateChartFan();
     updateChartTempsInt();
+
+    updateLastMesurements();
 });
 
 function updateChartTemps()
 {
-    chartTemps.setData(arrChartTemps);
+    chartTemps.data.labels = arrLabelsChart;
+    chartTemps.data.datasets = arrChartTemps;
+    chartTemps.update();
 }
 
 function updateChartConsumption()
 {
-    chartConsumptions.setData(arrChartConsumption);
+    chartConsumption.data.labels = arrLabelsChart;
+    chartConsumption.data.datasets = arrChartConsumption;
+    chartConsumption.update();
 }
 
 function updateChartFan()
 {
-    chartFan.setData(arrChartFan);
+    chartFan.data.labels = arrLabelsChart;
+    chartFan.data.datasets = arrChartFan;
+    chartFan.update();
 }
 
 function updateChartTempsInt()
 {
-    chartTempsInto.setData(arrChartTempsInto);
+    chartTempInt.data.labels = arrLabelsChart;
+    chartTempInt.data.datasets = arrChartTempsInt;
+    chartTempInt.update();
 }
 
 function updateLastMesurements()
@@ -138,5 +190,7 @@ function updateLastMesurements()
     $('#lastTempBack').text(lastTempBack);
     $('#lastTempFront').text(lastTempFront);
     $('#lastConsumption').text(lastConsumption);
+    $('#lastTempFridge').text(lastTempFri);
+    $('#lastTempFreezer').text(lastTempFre);
     $('#lastFan').text(lastFan);
 }
