@@ -131,18 +131,27 @@ $(document).ready(function() {
             arrLabelsChart.push(childSnapshot.key.toString().substr(childSnapshot.key.toString().indexOf(' ') + 1));
 
             arrChartTempBackData.push(childSnapshot.val().tempInt);
-            arrChartTempFrontData.push(childSnapshot.val().tempOut);
             arrChartConsumptionData.push(childSnapshot.val().consumption);
             arrChartFanData.push(childSnapshot.val().timeFan);
             arrChartTempFreData.push(childSnapshot.val().tempFre);
             arrChartTempFriData.push(childSnapshot.val().tempFri);
 
-            lastTempFront = childSnapshot.val().tempOut;
             lastTempBack = childSnapshot.val().tempInt;
             lastConsumption = childSnapshot.val().consumption;
             lastFan = childSnapshot.val().timeFan;
             lastTempFre = childSnapshot.val().tempFre;
             lastTempFri = childSnapshot.val().tempFri;
+
+            if(childSnapshot.val().tempOut == null)
+            {
+                arrChartTempFrontData.push(childSnapshot.val().tempout);
+                lastTempFront = childSnapshot.val().tempout;
+            }
+            else
+            {
+                arrChartTempFrontData.push(childSnapshot.val().tempOut);
+                lastTempFront = childSnapshot.val().tempOut;
+            }
         });
 
         arrChartTempsInt.push({
