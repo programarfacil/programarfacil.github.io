@@ -40,12 +40,32 @@ var optionsChart = {
     }
 }
 
+var optionsChartTemps = {
+    responsive:true,
+    bezierCurve: true,
+    animation: {
+        duration:0
+    },
+    elements: {
+        point: {
+            radius:1 
+        }
+    },
+    scales: {
+        yAxes: [{
+            ticks: {
+                beginAtZero:false
+            }
+        }]
+    }
+}
+
 var ctxTemps = document.getElementById("temps-chart").getContext('2d');
 var chartTemps = new Chart(ctxTemps, {
     type: 'line',
     data: {
     },
-    options: optionsChart
+    options: optionsChartTemps
 });
 
 var ctxConsumption = document.getElementById("consumption-chart").getContext('2d');
