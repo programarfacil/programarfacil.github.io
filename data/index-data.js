@@ -1,6 +1,7 @@
 var tiempoRefresh = 10000;
 var numberResults = 300;
-var macUser = 'A020A61AF950';
+var macUser = '';
+var nameFridge = '';
 var numberBins = 400;
 
 
@@ -81,80 +82,101 @@ firebase.initializeApp(config);
 // Get a reference to the database service
 var database = firebase.database();
 
+$(document).ready(function() {
 
-var starCountRef = firebase.database().ref(macUser).limitToLast(numberBins);
-starCountRef.on('value', function(snapshot) {
-    var arrChartTempBackData = [];
-    var arrChartTempFrontData = [];
-    var arrChartConsumptionData = [];
-    var arrChartFanData = [];
-    var arrChartTempFreData = [];
-    var arrChartTempFriData = [];
+    var vars = [], hash;
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
 
-    arrLabelsChart = [];
-    arrChartTemps = [];
-    arrChartConsumption = [];
-    arrChartFan = [];
-    arrChartTempsInt = [];
-
-    snapshot.forEach(function(childSnapshot) {
-        arrLabelsChart.push(childSnapshot.key.toString().substr(childSnapshot.key.toString().indexOf(' ') + 1));
-
-        arrChartTempBackData.push(childSnapshot.val().tempInt);
-        arrChartTempFrontData.push(childSnapshot.val().tempOut);
-        arrChartConsumptionData.push(childSnapshot.val().consumption);
-        arrChartFanData.push(childSnapshot.val().timeFan);
-        arrChartTempFreData.push(childSnapshot.val().tempFre);
-        arrChartTempFriData.push(childSnapshot.val().tempFri);
-
-        lastTempFront = childSnapshot.val().tempOut;
-        lastTempBack = childSnapshot.val().tempInt;
-        lastConsumption = childSnapshot.val().consumption;
-        lastFan = childSnapshot.val().timeFan;
-        lastTempFre = childSnapshot.val().tempFre;
-        lastTempFri = childSnapshot.val().tempFri;
-    });
-
-    arrChartTempsInt.push({
-            label: 'Temp. Freezer ºC',
-            backgroundColor: "rgba(203, 136, 18, 0.5)",
-            data: arrChartTempFreData
-        },{
-            label: 'Temp. Fridge ºC',
-            backgroundColor: "rgba(173, 144, 92, 0.5)",
-            data: arrChartTempFriData 
+        if(hash[0]=='mac')
+        {
+            macUser = hash[1];
         }
-    );
-
-    arrChartFan.push({
-        label: 'Fan on minutes',
-        backgroundColor: "rgba(60, 118, 61, 0.5)",
-        data: arrChartFanData
-    });
-
-    arrChartConsumption.push({
-        label: 'Consumption Wh',
-        backgroundColor: "rgba(169, 68, 66, 0.5)",
-        data: arrChartConsumptionData
-    });
-
-    arrChartTemps.push({
-            label: 'Temp. Front ºC',
-            backgroundColor: "rgba(49, 112, 143, 0.5)",
-            data: arrChartTempFrontData
-        },{
-            label: 'Temp. Back ºC',
-            backgroundColor: "rgba(138, 109, 59, 0.5)",
-            data: arrChartTempBackData 
+        else if (hash[0]=='nameFridge')
+        {
+            nameFridge = hash[1];
         }
-    );
+    }
 
-    updateChartTemps();
-    updateChartConsumption();
-    updateChartFan();
-    updateChartTempsInt();
+    var starCountRef = firebase.database().ref(macUser).limitToLast(numberBins);
 
-    updateLastMesurements();
+    starCountRef.on('value', function(snapshot) {
+        var arrChartTempBackData = [];
+        var arrChartTempFrontData = [];
+        var arrChartConsumptionData = [];
+        var arrChartFanData = [];
+        var arrChartTempFreData = [];
+        var arrChartTempFriData = [];
+
+        arrLabelsChart = [];
+        arrChartTemps = [];
+        arrChartConsumption = [];
+        arrChartFan = [];
+        arrChartTempsInt = [];
+
+        snapshot.forEach(function(childSnapshot) {
+            arrLabelsChart.push(childSnapshot.key.toString().substr(childSnapshot.key.toString().indexOf(' ') + 1));
+
+            arrChartTempBackData.push(childSnapshot.val().tempInt);
+            arrChartTempFrontData.push(childSnapshot.val().tempOut);
+            arrChartConsumptionData.push(childSnapshot.val().consumption);
+            arrChartFanData.push(childSnapshot.val().timeFan);
+            arrChartTempFreData.push(childSnapshot.val().tempFre);
+            arrChartTempFriData.push(childSnapshot.val().tempFri);
+
+            lastTempFront = childSnapshot.val().tempOut;
+            lastTempBack = childSnapshot.val().tempInt;
+            lastConsumption = childSnapshot.val().consumption;
+            lastFan = childSnapshot.val().timeFan;
+            lastTempFre = childSnapshot.val().tempFre;
+            lastTempFri = childSnapshot.val().tempFri;
+        });
+
+        arrChartTempsInt.push({
+                label: 'Temp. Freezer ºC',
+                backgroundColor: "rgba(203, 136, 18, 0.5)",
+                data: arrChartTempFreData
+            },{
+                label: 'Temp. Fridge ºC',
+                backgroundColor: "rgba(173, 144, 92, 0.5)",
+                data: arrChartTempFriData 
+            }
+        );
+
+        arrChartFan.push({
+            label: 'Fan on minutes',
+            backgroundColor: "rgba(60, 118, 61, 0.5)",
+            data: arrChartFanData
+        });
+
+        arrChartConsumption.push({
+            label: 'Consumption Wh',
+            backgroundColor: "rgba(169, 68, 66, 0.5)",
+            data: arrChartConsumptionData
+        });
+
+        arrChartTemps.push({
+                label: 'Temp. Front ºC',
+                backgroundColor: "rgba(49, 112, 143, 0.5)",
+                data: arrChartTempFrontData
+            },{
+                label: 'Temp. Back ºC',
+                backgroundColor: "rgba(138, 109, 59, 0.5)",
+                data: arrChartTempBackData 
+            }
+        );
+
+        updateChartTemps();
+        updateChartConsumption();
+        updateChartFan();
+        updateChartTempsInt();
+
+        updateLastMesurements();
+    });
 });
 
 function updateChartTemps()
@@ -193,4 +215,6 @@ function updateLastMesurements()
     $('#lastTempFridge').text(lastTempFri);
     $('#lastTempFreezer').text(lastTempFre);
     $('#lastFan').text(lastFan);
+    $('#nameAndMac').text("(" + nameFridge + ") " + macUser);
 }
+
