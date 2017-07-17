@@ -2,7 +2,8 @@ var tiempoRefresh = 10000;
 var numberResults = 300;
 var macUser = '';
 var nameFridge = '';
-var numberBins = 400;
+var numberBins = 360;
+var namePeriod = '6/hours';
 
 
 var arrChartTemps = [];
@@ -33,7 +34,7 @@ var optionsChart = {
     scales: {
         yAxes: [{
             ticks: {
-                beginAtZero:false
+                beginAtZero:true
             }
         }]
     }
@@ -100,6 +101,14 @@ $(document).ready(function() {
         {
             nameFridge = hash[1];
         }
+        else if (hash[0] == 'numberBins')
+        {
+            numberBins = parseInt(hash[1]);
+        }
+        else if (hash[0] == 'namePeriod')
+        {
+            namePeriod = hash[1];
+        }
     }
 
     var starCountRef = firebase.database().ref(macUser).limitToLast(numberBins);
@@ -138,34 +147,34 @@ $(document).ready(function() {
 
         arrChartTempsInt.push({
                 label: 'Temp. Freezer ºC',
-                backgroundColor: "rgba(203, 136, 18, 0.5)",
+                backgroundColor: "rgba(170, 200, 226, 0.8)",
                 data: arrChartTempFreData
             },{
                 label: 'Temp. Fridge ºC',
-                backgroundColor: "rgba(173, 144, 92, 0.5)",
+                backgroundColor: "rgba(7, 101, 180, 0.8)",
                 data: arrChartTempFriData 
             }
         );
 
         arrChartFan.push({
             label: 'Fan on minutes',
-            backgroundColor: "rgba(60, 118, 61, 0.5)",
+            backgroundColor: "rgba(60, 118, 61, 0.8)",
             data: arrChartFanData
         });
 
         arrChartConsumption.push({
             label: 'Consumption Wh',
-            backgroundColor: "rgba(169, 68, 66, 0.5)",
+            backgroundColor: "rgba(214, 11, 11, 0.8)",
             data: arrChartConsumptionData
         });
 
         arrChartTemps.push({
                 label: 'Temp. Front ºC',
-                backgroundColor: "rgba(49, 112, 143, 0.5)",
+                backgroundColor: "rgba(21, 88, 29, 0.8)",
                 data: arrChartTempFrontData
             },{
                 label: 'Temp. Back ºC',
-                backgroundColor: "rgba(138, 109, 59, 0.5)",
+                backgroundColor: "rgba(134, 8, 8, 0.8)",
                 data: arrChartTempBackData 
             }
         );
@@ -177,6 +186,12 @@ $(document).ready(function() {
 
         updateLastMesurements();
     });
+
+    // Create links periods
+    $("#link6hours").attr("href", "index.html?mac="+macUser+"&nameFridge="+nameFridge+"&numberBins=360&namePeriod=6/hours");
+    $("#link12hours").attr("href", "index.html?mac="+macUser+"&nameFridge="+nameFridge+"&numberBins=720&namePeriod=12/hours");
+    $("#link1day").attr("href", "index.html?mac="+macUser+"&nameFridge="+nameFridge+"&numberBins=1440&namePeriod=1/day");
+    $("#link2days").attr("href", "index.html?mac="+macUser+"&nameFridge="+nameFridge+"&numberBins=2880&namePeriod=2/days");
 });
 
 function updateChartTemps()
@@ -216,5 +231,6 @@ function updateLastMesurements()
     $('#lastTempFreezer').text(lastTempFre);
     $('#lastFan').text(lastFan);
     $('#nameAndMac').text("(" + nameFridge + ") " + macUser);
+    $('#titleDashboard').text("Dashboard (" + namePeriod + ")");
 }
 
